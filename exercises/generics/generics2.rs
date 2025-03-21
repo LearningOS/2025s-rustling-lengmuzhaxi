@@ -6,14 +6,16 @@
 // Execute `rustlings hint generics2` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
-struct Wrapper {
-    value: u32,
+
+// This wrapper is now generic and can store any type.
+struct Wrapper<T> {
+    value: T,
 }
 
-impl Wrapper {
-    pub fn new(value: u32) -> Self {
+impl<T> Wrapper<T> {
+    // The `new` function now works for any type `T`.
+    pub fn new(value: T) -> Self {
         Wrapper { value }
     }
 }
