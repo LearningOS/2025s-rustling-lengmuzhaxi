@@ -20,16 +20,13 @@
 // which both errors implement?
 //
 // Execute `rustlings hint errors5` or use the `hint` watch subcommand for a
-// hint.
-
-// I AM NOT DONE
-
+// hint
 use std::error;
 use std::fmt;
 use std::num::ParseIntError;
 
 // TODO: update the return type of `main()` to make this compile.
-fn main() -> Result<(), Box<dyn ???>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pretend_user_input = "42";
     let x: i64 = pretend_user_input.parse()?;
     println!("output={:?}", PositiveNonzeroInteger::new(x)?);
