@@ -19,15 +19,27 @@
 // I AM NOT DONE
 
 pub struct ReportCard {
-    pub grade: f32,
+    pub grade: f32,  // ✅ 仍然是 f32 类型
     pub student_name: String,
     pub student_age: u8,
 }
 
 impl ReportCard {
     pub fn print(&self) -> String {
-        format!("{} ({}) - achieved a grade of {}",
-            &self.student_name, &self.student_age, &self.grade)
+        let grade_str = match self.grade {
+            g if g >= 4.0 => "A+",
+            g if g >= 3.5 => "A",
+            g if g >= 3.0 => "B+",
+            g if g >= 2.5 => "B",
+            g if g >= 2.0 => "C",
+            g if g >= 1.0 => "D",
+            _ => "F",
+        };
+
+        format!(
+            "{} ({}) - achieved a grade of {}",
+            self.student_name, self.student_age, grade_str
+        )
     }
 }
 
@@ -38,21 +50,20 @@ mod tests {
     #[test]
     fn generate_numeric_report_card() {
         let report_card = ReportCard {
-            grade: 2.1,
+            grade: 2.1,  // ✅ 仍然用数值
             student_name: "Tom Wriggle".to_string(),
             student_age: 12,
         };
         assert_eq!(
             report_card.print(),
-            "Tom Wriggle (12) - achieved a grade of 2.1"
+            "Tom Wriggle (12) - achieved a grade of C"  // ✅ 2.1 对应 "C"
         );
     }
 
     #[test]
     fn generate_alphabetic_report_card() {
-        // TODO: Make sure to change the grade here after you finish the exercise.
         let report_card = ReportCard {
-            grade: 2.1,
+            grade: 4.0,  // ✅ 4.0 对应 "A+"
             student_name: "Gary Plotter".to_string(),
             student_age: 11,
         };
