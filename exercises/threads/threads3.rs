@@ -2,11 +2,7 @@
 //
 // Execute `rustlings hint threads3` or use the `hint` watch subcommand for a
 // hint.
-
-// I AM NOT DONE
-
-use std::sync::mpsc;
-use std::sync::Arc;
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -26,21 +22,28 @@ impl Queue {
     }
 }
 
-fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
-    let qc = Arc::new(q);
-    let qc1 = Arc::clone(&qc);
-    let qc2 = Arc::clone(&qc);
+fn send_tx(q: Arc<Mutex<Queue>>, tx: Arc<Mutex<mpsc::Sender<u32>>>) {
+    let qc1 = Arc::clone(&q);
+    let qc2 = Arc::clone(&q);
+    let tx1 = Arc::clone(&tx);
+    let tx2 = Arc::clone(&tx);
 
+    // Thread for first_half
     thread::spawn(move || {
-        for val in &qc1.first_half {
+        let q = qc1.lock().unwrap();  // Lock the queue
+        let tx = tx1.lock().unwrap(); // Lock the sender
+        for val in &q.first_half {
             println!("sending {:?}", val);
             tx.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
 
+    // Thread for second_half
     thread::spawn(move || {
-        for val in &qc2.second_half {
+        let q = qc2.lock().unwrap();  // Lock the queue
+        let tx = tx2.lock().unwrap(); // Lock the sender
+        for val in &q.second_half {
             println!("sending {:?}", val);
             tx.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
@@ -50,8 +53,9 @@ fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
 
 fn main() {
     let (tx, rx) = mpsc::channel();
-    let queue = Queue::new();
-    let queue_length = queue.length;
+    let queue = Arc::new(Mutex::new(Queue::new()));  // Wrap queue in Arc<Mutex>
+    let queue_length = queue.lock().unwrap().length;
+    let tx = Arc::new(Mutex::new(tx));  // Wrap sender in Arc<Mutex>
 
     send_tx(queue, tx);
 
@@ -62,5 +66,5 @@ fn main() {
     }
 
     println!("total numbers received: {}", total_received);
-    assert_eq!(total_received, queue_length)
+    assert_eq!(total_received, queue_length);
 }
