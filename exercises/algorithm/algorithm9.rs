@@ -1,9 +1,3 @@
-/*
-	heap
-	This question requires you to implement a binary heap function
-*/
-// I AM NOT DONE
-
 use std::cmp::Ord;
 use std::default::Default;
 
@@ -37,7 +31,18 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.push(value);
+        self.bubble_up(self.count);
+    }
+
+    fn bubble_up(&mut self, idx: usize) {
+        let mut idx = idx;
+        while idx > 1 && (self.comparator)(&self.items[idx], &self.items[self.parent_idx(idx)]) {
+            let parent_idx = self.parent_idx(idx); // 先计算父节点的索引
+            self.items.swap(idx, parent_idx);      // 交换当前节点和父节点
+            idx = parent_idx;
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +62,36 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        if right <= self.count && (self.comparator)(&self.items[right], &self.items[left]) {
+            right
+        } else {
+            left
+        }
+    }
+
+    fn bubble_down(&mut self, idx: usize) {
+        let mut idx = idx;
+        while self.children_present(idx) {
+            let smaller_child = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smaller_child], &self.items[idx]) {
+                self.items.swap(idx, smaller_child);
+                idx = smaller_child;
+            } else {
+                break;
+            }
+        }
+    }
+
+    pub fn remove(&mut self) -> Option<T> {
+        if self.is_empty() {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        self.count -= 1;
+        self.bubble_down(1);
+        self.items.pop()
     }
 }
 
@@ -79,13 +112,17 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + Ord,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            None
+        } else {
+            let root = self.remove();
+            root
+        }
     }
 }
 
@@ -116,6 +153,7 @@ impl MaxHeap {
 #[cfg(test)]
 mod tests {
     use super::*;
+    
     #[test]
     fn test_empty_heap() {
         let mut heap = MaxHeap::new::<i32>();

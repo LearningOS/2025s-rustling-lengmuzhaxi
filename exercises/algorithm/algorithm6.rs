@@ -1,9 +1,3 @@
-/*
-	dfs
-	This problem requires you to implement a basic DFS traversal
-*/
-
-// I AM NOT DONE
 use std::collections::HashSet;
 
 struct Graph {
@@ -23,7 +17,19 @@ impl Graph {
     }
 
     fn dfs_util(&self, v: usize, visited: &mut HashSet<usize>, visit_order: &mut Vec<usize>) {
-        //TODO
+        // 如果该节点已被访问，则直接返回
+        if visited.contains(&v) {
+            return;
+        }
+        // 标记当前节点为已访问，并记录访问顺序
+        visited.insert(v);
+        visit_order.push(v);
+        // 递归访问所有邻居
+        for &neighbor in &self.adj[v] {
+            if !visited.contains(&neighbor) {
+                self.dfs_util(neighbor, visited, visit_order);
+            }
+        }
     }
 
     // Perform a depth-first search on the graph, return the order of visited nodes
@@ -75,4 +81,3 @@ mod tests {
         assert_eq!(visit_order_disconnected, vec![3, 4]); 
     }
 }
-
