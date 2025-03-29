@@ -22,7 +22,6 @@
 // Execute `rustlings hint tests5` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
 /// # Safety
 ///
@@ -54,19 +53,17 @@ unsafe fn modify_by_address(address: usize) {
 //
 // Execute `rustlings hint tests5` or use the `hint` watch subcommand for a
 // hint.
-
-// I AM NOT DONE
-
 /// # Safety
 ///
-/// The `address` must contain a mutable reference to a valid `u32` value.
+/// - The `address` must be a valid, non-null, and properly aligned pointer to a mutable `u32` value.
+/// - The caller must ensure that the memory at `address` is owned and not accessed elsewhere concurrently.
+/// - The memory at `address` must be initialized before dereferencing.
 unsafe fn modify_by_address(address: usize) {
-    // TODO: Fill your safety notice of the code block below to match your
-    // code's behavior and the contract of this function. You may use the
-    // comment of the test below as your format reference.
     let ptr = address as *mut u32;
-    if !ptr.is_null() {
-        *ptr = 0xAABBCCDD; // 修改指针指向的值
+    
+    // SAFETY: Caller must ensure that `ptr` is valid, non-null, and properly aligned.
+    if !ptr.is_null() && ptr.align_offset(std::mem::align_of::<u32>()) == 0 {
+        *ptr = 0xAABBCCDD;
     }
 }
 
@@ -77,25 +74,18 @@ mod tests {
     #[test]
     fn test_success() {
         let mut t: u32 = 0x12345678;
-        // SAFETY: The address is guaranteed to be valid and contains
-        // a unique reference to a `u32` local variable.
+        
+        // SAFETY: `&mut t` is a valid and unique mutable reference to `u32`,
+        // ensuring `modify_by_address` receives a valid pointer.
         unsafe { modify_by_address(&mut t as *mut u32 as usize) };
-        assert!(t == 0xAABBCCDD);
+        
+        assert_eq!(t, 0xAABBCCDD);
     }
-}
-
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
 
     #[test]
-    fn test_success() {
-        let mut t: u32 = 0x12345678;
-        // SAFETY: The address is guaranteed to be valid and contains
-        // a unique reference to a `u32` local variable.
-        unsafe { modify_by_address(&mut t as *mut u32 as usize) };
-        assert!(t == 0xAABBCCDD);
+    fn test_null_pointer_no_panic() {
+        // SAFETY: We are explicitly testing a null pointer case.
+        unsafe { modify_by_address(0) }; // Should not crash or modify anything.
     }
+}
 }
